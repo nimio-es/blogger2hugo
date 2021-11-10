@@ -421,8 +421,19 @@ let convertToPost (banner: string) (asDraft: bool) (entry: backup.Entry) : hugo.
 
 [<Literal>]
 let FilePath = "blog-11-06-2021.xml"
+
+(* {{< unsafe-raw-html >}} es un shortcode de Hugo para forzar la inclusión del html que queramos. *)
 [<Literal>]
-let BannerEachPost = "---\n\n_Esta entrada ha sido importada desde mi anterior blog [Píldoras para la egolatría](https://unomascero.blogspot.com/)_\n\nEs muy probable que el formato no haya quedado bien y/o que parte del contenido, como imágenes y vídeos, no sea visible. Asimismo los enlaces probablemente ya no funcionen correctamente.\n\nPor último pedir diculpas por el contenido. Es de muy mala calidad y la mayoría de las entradas recuperadas no merecían serlo. Pero aquí está esta entrada como ejemplo de que no me resulta fácil deshacerme de lo que había escrito. De verdad que lo siento muchísimo si te has parado a leerlo. &#x1F614;\n\n---\n\n"
+let BannerEachPost = "{{< unsafe-raw-html >}}<div style=\"padding: 1em; border-top: 1px dashed black; border-bottom: 1px dashed black; background-color: lightgray;\">{{< / unsafe-raw-html >}}\n\n\
+                      _Esta entrada ha sido importada desde mi anterior blog: **Píldoras para la egolatría**_\n\n\
+                      Es muy probable que el formato no haya quedado bien y/o que parte del contenido, como imágenes y vídeos, \
+                      no sea visible. Asimismo los enlaces probablemente funcionen mal.\n\n\
+                      Por último pedir diculpas por el contenido. Es de muy mala calidad y la mayoría de las entradas recuperadas \
+                      no merecían serlo. Pero aquí está esta entrada como ejemplo de que no me resulta fácil deshacerme de lo \
+                      que había escrito. De verdad que lo siento muchísimo si has llegado aquí de forma accidental y te has parado \
+                      a leerlo. &#x1F614;\n\
+                      {{< unsafe-raw-html >}}</div>{{< / unsafe-raw-html >}}\n\n"
+
 let feed = backup.read(FilePath)
 
 let isPost (entry: backup.Entry) =
