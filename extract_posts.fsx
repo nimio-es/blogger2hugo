@@ -96,7 +96,15 @@ module backup =
 
 module utils =
     let slugging (s:string) =
-        s.ToLower().Replace("http://","").Replace("https://","").Replace(".com.es",".com").Replace("/","-").Replace(".","_").Replace("%20","-")
+        let mutable t =  s.ToLower()
+        t <- t.Replace("http://","").Replace("https://","")
+        t <- t.Replace(".com.es",".com")
+        t <- t.Replace("unomascero.blogspot.com/", "old_")
+        t <- t.Replace(".html", "").Replace("html", "")
+        t <- t.Replace("/","-").Replace(".","_").Replace("%20","-")
+        t <- t.Trim()
+        t <- if t.Length > 50 then t.Substring(0, 50) else t
+        t
 
     let aliased (s:string) =
         s.Replace("http://","").Replace("https://","").Replace(".com.es",".com").Replace("unomascero.blogspot.com","").Replace("%20","-")
@@ -146,6 +154,8 @@ module hugo =
         title <- title.Replace(";", "_")
         title <- title.Replace("(", "")
         title <- title.Replace(")", "")
+        title <- title.Replace("[", "")
+        title <- title.Replace("]", "")
         title <- title.Replace("¡", "")
         title <- title.Replace("!", "")
         title <- title.Replace("¿", "")
@@ -176,7 +186,13 @@ module hugo =
         title <- title.Replace("»","")
         title <- title.Replace("…", "")
         let date = originalDate.Replace("-", "").Replace("T", "").Replace(":", "").Substring(0,12)
-        sprintf "%s_%s.md" date title
+        let filename = sprintf "%s_%s" date title
+        let filename' =
+            if(filename.Length > 60) then
+                filename.Substring(0,60)
+            else
+                filename
+        sprintf "%s.md" filename'
 
     let store (post: model.post): storablePost =
         let post' = {
@@ -362,8 +378,8 @@ module hugo =
                 sprintf "externalLink: \"%s\"" post.frontMatter.externalLink
                 "series:"
                 post.frontMatter.series |> List.map (sprintf "  - \"%s\"") |> String.concat "\n"
-                "aliases:"
-                post.frontMatter.aliases |> List.map (sprintf "  - \"%s\"") |> String.concat "\n"
+//                "aliases:"
+//                post.frontMatter.aliases |> List.map (sprintf "  - \"%s\"") |> String.concat "\n"
                 "---"
                 ""
                 post.content
@@ -416,7 +432,7 @@ let convertToPost (banner: string) (asDraft: bool) (entry: backup.Entry) : hugo.
             series = ["vidas pasadas"; "píldoras para la egolatría"]
             aliases = []
         }
-        content = hugo.fromHtml entry.Content.Value |> sprintf "%s%s" banner // entry.Content.Value
+        content = (hugo.fromHtml entry.Content.Value |> sprintf "%s\n\n%s") banner
     }
 
 [<Literal>]
@@ -424,7 +440,7 @@ let FilePath = "blog-11-06-2021.xml"
 
 (* {{< unsafe-raw-html >}} es un shortcode de Hugo para forzar la inclusión del html que queramos. *)
 [<Literal>]
-let BannerEachPost = "{{< unsafe-raw-html >}}<div style=\"padding: 1em; border-top: 1px dashed black; border-bottom: 1px dashed black; background-color: lightgray;\">{{< / unsafe-raw-html >}}\n\n\
+let BannerEachPost = "{{< unsafe-raw-html >}}<div class=\"oldpost\" style=\"padding: 1em; border-top: 1px dashed black; border-bottom: 1px dashed black; background-color: lightgray;\">{{< / unsafe-raw-html >}}\n\n\
                       _Esta entrada ha sido importada desde mi anterior blog: **Píldoras para la egolatría**_\n\n\
                       Es muy probable que el formato no haya quedado bien y/o que parte del contenido, como imágenes y vídeos, \
                       no sea visible. Asimismo los enlaces probablemente funcionen mal.\n\n\
@@ -432,7 +448,7 @@ let BannerEachPost = "{{< unsafe-raw-html >}}<div style=\"padding: 1em; border-t
                       no merecían serlo. Pero aquí está esta entrada como ejemplo de que no me resulta fácil deshacerme de lo \
                       que había escrito. De verdad que lo siento muchísimo si has llegado aquí de forma accidental y te has parado \
                       a leerlo. &#x1F614;\n\
-                      {{< unsafe-raw-html >}}</div>{{< / unsafe-raw-html >}}\n\n"
+                      {{< unsafe-raw-html >}}</div>{{< / unsafe-raw-html >}}\n"
 
 let feed = backup.read(FilePath)
 
